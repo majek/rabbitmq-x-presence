@@ -1,0 +1,7 @@
+{application, rabbit_x_presence,
+ [{description, "RabbitMQ X-Presence Exchange Plugin"},
+  {vsn, "%%VSN%%"},
+  {modules, [rabbit_x_presence_app, rabbit_x_presence]},
+  {registered, []},
+  {mod, {rabbit_x_presence_app, []}},
+  {applications, [kernel, stdlib, rabbit, mnesia]}]}.
