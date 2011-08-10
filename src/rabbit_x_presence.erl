@@ -25,7 +25,7 @@
                     {requires,    rabbit_registry},
                     {enables,     kernel_ready}]}).
 
--export([description/0, route/2]).
+-export([description/0, serialise_events/0, route/2]).
 -export([validate/1, create/2, recover/2, delete/3, add_binding/3,
 	 remove_bindings/3, assert_args_equivalence/2]).
 
@@ -38,7 +38,7 @@ encode_binding_delivery(DeliveryXName,
                {<<"exchange">>, longstr, XName},
                {<<"queue">>, longstr, QName},
                {<<"key">>, longstr, BindingKey}],
-    rabbit_basic:delivery(false, false, none,
+    rabbit_basic:delivery(false, false,
                           rabbit_basic:message(
 			    DeliveryXName, <<"listen">>,
 			    [{headers, Headers}], <<>>),
@@ -48,16 +48,18 @@ description() ->
     [{name, <<"x-presence">>},
      {description, <<"Presence exchange">>}].
 
+serialise_events() -> false.
+
 route(#exchange{name = Name},
-      #delivery{message = #basic_message{routing_key = RoutingKey}}) ->
-    rabbit_router:match_routing_key(Name, RoutingKey).
+      #delivery{message = #basic_message{routing_keys = RoutingKeys}}) ->
+    rabbit_router:match_routing_key(Name, RoutingKeys).
 
 validate(_X) -> ok.
 create(_Tx, _X) -> ok.
 recover(_X, _Bs) -> ok.
 delete(_Tx, _X, _Bs) -> ok.
 
-add_binding(_Tx, #exchange{name = XName},
+add_binding(_Tx, #exchange{name = _XName},
 	   #binding{key = <<"listen">>}) ->
     ok;
 add_binding(_Tx, #exchange{name = XName}, B) ->
