@@ -59,19 +59,23 @@ create(_Tx, _X) -> ok.
 recover(_X, _Bs) -> ok.
 delete(_Tx, _X, _Bs) -> ok.
 
-add_binding(_Tx, #exchange{name = _XName},
+add_binding(transaction, #exchange{name = _XName},
 	   #binding{key = <<"listen">>}) ->
     ok;
-add_binding(_Tx, #exchange{name = XName}, B) ->
+add_binding(transaction, #exchange{name = XName}, B) ->
     rabbit_basic:publish(encode_binding_delivery(XName, bind, B)),
+    ok;
+add_binding(none, _Exchange, _Binding) ->
     ok.
 
 remove_bindings(Tx, X, Bs) ->
     [ok = remove_binding(Tx, X, B) || B <- Bs],
     ok.
 
-remove_binding(_Tx, #exchange{name = XName}, B) ->
+remove_binding(transaction, #exchange{name = XName}, B) ->
     rabbit_basic:publish(encode_binding_delivery(XName, unbind, B)),
+    ok;
+remove_binding(none, _X, _B) ->
     ok.
 
 assert_args_equivalence(X, Args) ->
